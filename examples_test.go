@@ -31,6 +31,21 @@ func TestBlobProveVerifySpecifiedPointIntegration(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestBlobProveVerifySpecifiedPointIntegration2(t *testing.T) {
+	blob := GetRandBlob(123)
+	commitment, err := ctx.BlobToKZGCommitment(blob, NumGoRoutines)
+	require.NoError(t, err)
+	// let's try to prove the 3rd point
+	inputPoint := [32]byte{31: 2}
+	val := blob[2*32 : 3*32]
+	t.Logf("val: %x", val)
+	proof, claimedValue, err := ctx.ComputeKZGProof(blob, inputPoint, NumGoRoutines)
+	require.NoError(t, err)
+	t.Logf("claim: %x", val)
+	err = ctx.VerifyKZGProof(commitment, inputPoint, claimedValue, proof)
+	require.NoError(t, err)
+}
+
 func TestBlobProveVerifyBatchIntegration(t *testing.T) {
 	batchSize := 5
 	blobs := make([]gokzg4844.Blob, batchSize)
